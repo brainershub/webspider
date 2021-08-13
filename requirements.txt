@@ -1,5 +1,8 @@
 Scrapy
 Scrapy-splash
+scrapy-rotating-proxies
+scrapyd
+git+https://github.com/iamumairayub/scrapyd-client.git
 SQLAlchemy
 pandas
 psycopg2-binary

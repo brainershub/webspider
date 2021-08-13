@@ -48,8 +48,10 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 1
 #SPIDER_MIDDLEWARES = {
 #    'pharma.middlewares.PharmaSpiderMiddleware': 543,
 #}
+
 SPIDER_MIDDLEWARES = {
     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+    'pharma.middlewares.SaveInfoInDataBase': 300,
 }
 
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
@@ -60,6 +62,8 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 #    'pharma.middlewares.PharmaDownloaderMiddleware': 543,
 #}
 DOWNLOADER_MIDDLEWARES = {
+    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
@@ -125,3 +129,6 @@ DATABASE = {
 # }
 
 LOG_LEVEL = "INFO"
+
+###SETUP PROXY WITH https://github.com/TeamHG-Memex/scrapy-rotating-proxies
+ROTATING_PROXY_LIST_PATH = 'C:/Users/MikhailPetrovBrainer/Git_Repos/scrapy_dev/proxies.txt'

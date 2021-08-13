@@ -77,3 +77,26 @@ class Items(DeclarativeBase):
             self.summary = 'TEXT IS NOT A STRING OR FAILED TO BUILD SUMMARY'
         
         self.labels = labels
+
+
+class Info(DeclarativeBase):
+    __tablename__ = os.environ['TABLE_INFO']
+
+    id = Column('id', Integer, primary_key=True)
+    spider_name = Column('Spider', String)
+    started_at = Column('Start', DateTime)
+    finished_at = Column('Finish', DateTime)
+    scraped_items = Column('Scraped', Integer, primary_key=False)
+    dropped_items = Column('Drop', Integer, primary_key=False)
+    #bad_response = Column('Bad', Integer)
+    status = Column('Status', String)
+
+    def __init__(self, **kwargs):
+        self.spider_name = kwargs['spider_name']
+        self.started_at = kwargs['started_at']
+        self.finished_at = kwargs['finished_at']
+        self.scraped_items = kwargs['scraped_items']
+        self.dropped_items = kwargs['dropped_items']
+        #self.bad_response = kwargs['bad_response']
+        self.status = kwargs['status']
+

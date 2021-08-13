@@ -4,7 +4,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from sqlalchemy.orm import sessionmaker
+from pharma.models import Info, create_items_table, db_connect
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
 
@@ -101,3 +102,42 @@ class PharmaDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class SaveInfoInDataBase:
+    def __init__(self):
+        """
+        Initializes database connection and sessionmaker.
+        Creates items table.
+        """
+        engine = db_connect()
+        create_items_table(engine)
+        self.Session = sessionmaker(bind=engine)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        s = cls()
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        return s
+
+    def spider_closed(self, spider, reason):
+        db_arg = getattr(spider, 'addtodatabase', 'true')
+        stats = spider.crawler.stats.get_stats()
+        info = dict()
+        info['spider_name'] = spider.name
+        info['started_at'] = stats.get('start_time').strftime('%Y-%m-%d %H:%M:%S')
+        info['finished_at'] = stats.get('finish_time').strftime('%Y-%m-%d %H:%M:%S')
+        info['scraped_items'] = stats.get('item_scraped_count')
+        info['dropped_items'] = stats.get('item_dropped_count')
+        info['status'] = stats.get('finish_reason')
+
+        """
+        Save jobs in the database.
+        This method is called whenever the spider is finished (closed)
+        """
+
+        session = self.Session()
+        info_add = Info(**info)
+        session.add(info_add)
+        session.commit()
+        session.close()
