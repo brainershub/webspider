@@ -1,0 +1,8 @@
+Scrapy
+Scrapy-splash
+SQLAlchemy
+pandas
+psycopg2-binary
+nltk
+textblob_de
+networkx
