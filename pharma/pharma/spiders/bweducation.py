@@ -12,11 +12,11 @@ class BweducationSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//div[@class="item-content"]/h3/a'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//a[@class="next page-numbers"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[@class="next page-numbers"]'), follow=True),
     )
 
     title_xpath = '//h1[@class="big_article_header"]/text()'
-    text_xpath = '//section[@class="the-content"]/p/descendant::text()'
+    text_xpath = '//div[contains(@class,"article_text")]/descendant::text()'
     author_xpath = '//span[@class="author"]/a/text()'
     # contentdate_xpath = '//div[@class="post-meta"]//span[@class="date "]/text()'
     contantdate_x = '//span[@class="date"]/text()'
@@ -36,13 +36,12 @@ class BweducationSpider(CrawlSpider):
         month = response.xpath(self.contantmonth_x).get()
         date = [day, month]
         content_date_raw = ', '.join(date)
-        content_date_clean = clean_date(content_date_raw)
 
         yield {
             'title': response.xpath(self.title_xpath).get(),
             'author': authors,
             'content_text': text,
-            'content_date': content_date_clean,
+            'content_date': content_date_raw,
             'url': response.url,
             'url_base': self.allowed_domains[0],
             'labels': 'news'

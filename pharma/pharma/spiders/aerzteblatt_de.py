@@ -13,7 +13,7 @@ class AerzteblattDeSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//div[@class="newsListItem"]/h2/a'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//a[@title="weiter..."]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[@title="weiter..."]'), follow=True),
     )
 
     title_xpath = '//h1/text()'

@@ -36,9 +36,9 @@ class KargerSpider(scrapy.Spider):
     #     return request
 
     def parse(self, response):
-        links = response.xpath('//div[@class="column"]/a')
+        links = response.xpath('//h4[@class="media-heading"]/a/@href').getall()
         for link in links:
-            yield response.follow(url=link, callback=self.parse_article, meta={'date':link.xpath('.//p[@id="paraArticleCitation"]/text()[last()]').get()})
+            yield response.follow(url=link, callback=self.parse_article)
         
     def parse_article(self, response):
         author_list = response.xpath(self.author_xpath).getall()
@@ -50,8 +50,8 @@ class KargerSpider(scrapy.Spider):
         yield {
             'title': response.xpath(self.title_xpath).get(),
             'author': authors,
-            'text': text,
-            'content_date': response.meta.get('date'),
+            'content_text': text,
+            'content_date': response.xpath(self.contentdate_xpath).get(),
             'url': response.url,
             'url_base': self.allowed_domains[0],
             'labels': 'journal'

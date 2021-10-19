@@ -9,7 +9,9 @@
 #from itemadapter import ItemAdapter
 from scrapy.exceptions import DropItem
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import and_, or_, not_
+from sqlalchemy import and_, or_, not_, create_engine
+from sqlalchemy.engine.base import Engine
+from sqlalchemy.engine.url import URL
 import datetime
 
 from pharma.models import Items, create_items_table, db_connect
@@ -23,26 +25,36 @@ class PharmaPipeline:
         """
         engine = db_connect()
         create_items_table(engine)
-        self.Session = sessionmaker(bind=engine)
+        Session = sessionmaker(bind=engine)
+
+    # def open_spider(self, spider):
+    #     session = self.Session()
+
+    # def close_spider(self, spider):
+        
 
     def process_item(self, item, spider):
         """
         Process the item and store to database.
         """
         if not item['content_text']:
-            raise DropItem(f"No content_text found for {item!r}")
+            raise DropItem(f"No content_text found for {item['url']!r}")
 
         session = self.Session()
-        instance = session.query(Items).filter(or_(Items.title.like(item['title']), Items.url.like(item['url'])))
+        # instance = session.query(Items).filter(or_(Items.title.like(item['title']), Items.url.like(item['url'])))
+        instance = session.query(Items).filter(Items.url==item['url']).first()
         if instance:
-            raise DropItem(f"Duplicate item found: {item!r}")
+            raise DropItem(f"Duplicate item found for: {item['url']!r}")
             # return instance
 
         if isinstance(item['content_date'], datetime.date):
             zelda_item = Items(**item)
         else:
-            item['content_date'] = clean_date(item['content_date'])
-            zelda_item = Items(**item)
+            try:
+                item['content_date'] = clean_date(item['content_date'])
+                zelda_item = Items(**item)
+            except:
+                raise DropItem(f"No content_date: {item['content_date']!r}")
 
         # try:
         #     session.add(zelda_item)
@@ -80,3 +92,46 @@ class PharmaPipeline:
 class NoTextPipeline():
     def __init__(self) -> None:
         pass
+
+class DataBasePipeline():
+    def __init__(self, db_set):
+        self.database_settings = db_set
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            db_set = crawler.settings.get('DATABASE')
+        )
+
+    def open_spider(self, spider):
+        self.engine = create_engine(URL(**self.database_settings))
+        create_items_table(self.engine)
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
+    
+    def close_spider(self, spider):
+        self.session.close()
+
+    def process_item(self, item, spider):
+        if not item['content_text']:
+            raise DropItem(f"No content_text found for {item['url']!r}")
+
+        instance = self.session.query(Items).filter(Items.url==item['url']).first()
+        if instance:
+            raise DropItem(f"Duplicate item found for: {item['url']!r}")
+            # return instance
+
+        if isinstance(item['content_date'], datetime.date):
+            zelda_item = Items(**item)
+        else:
+            try:
+                item['content_date'] = clean_date(item['content_date'])
+                zelda_item = Items(**item)
+            except:
+                raise DropItem(f"No content_date: {item['content_date']!r}")#
+        
+        self.session.add(zelda_item)
+        self.session.commit()
+
+        return item
+        

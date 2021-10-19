@@ -11,8 +11,8 @@ class LwwSpider(scrapy.Spider):
 
     title_xpath = '//h1/text()'
     text_xpath = '//div[@id="article-abstract-content1"]/descendant::text() | //section[@id="ArticleBody"]/descendant::text()'
-    author_xpath = '//div[contains(text(), "Stand:")]/preceding-sibling::div/a/text()'
-    contentdate_xpath = 'substring-after(//p[@id="paraArticleCitation"]/text()[last()], ", ")'
+    author_xpath = '//section[@id="ejp-article-authors"]/p/text()'
+    contentdate_xpath = 'substring-after(//p[contains(text(), "Published online")]/text(), "Published online")'
 
     script = '''
     function main(splash, args)
@@ -25,22 +25,36 @@ class LwwSpider(scrapy.Spider):
     end
     '''
 
+    script_page = '''
+    function main(splash, args)
+        splash.private_mode_enabled = false
+        url = args.url
+        assert(splash:go(url))
+        assert(splash:wait(1))
+        local element = splash:select('#ejp-article-authors-link')
+        local bounds = element:bounds()
+        assert(element:mouse_click{x=bounds.width/2, y=bounds.height/2})
+        assert(splash:wait(0.5))
+        splash:set_viewport_full()
+        return splash:html()
+    end
+    '''
+
     def start_requests(self):
         for url in self.start_urls:
             yield SplashRequest(url=url, callback=self.parse, endpoint='execute', args={
                 'lua_source': self.script
             })
 
-    # def set_user_agent(self, request):
-    #     request.headers['User-Agent'] = self.user_agent
-    #     return request
 
     def parse(self, response):
-        links = response.xpath('//div[@class="column"]/a')
+        links = response.xpath('//h4/a/@href').getall()
         for link in links:
-            yield response.follow(url=link, callback=self.parse_article, meta={'date':link.xpath('.//p[@id="paraArticleCitation"]/text()[last()]').get()})
+            yield SplashRequest(url=link, callback=self.parse_article, endpoint='execute', args={
+                'lua_source': self.script_page
+            })
         
-    def parse_article(self, response):
+    def parse_article(self, response):  
         author_list = response.xpath(self.author_xpath).getall()
         authors = ', '.join(author_list)
 
@@ -50,8 +64,8 @@ class LwwSpider(scrapy.Spider):
         yield {
             'title': response.xpath(self.title_xpath).get(),
             'author': authors,
-            'text': text,
-            'content_date': response.meta.get('date'),
+            'content_text': text,
+            'content_date': response.xpath(self.contentdate_xpath),
             'url': response.url,
             'url_base': self.allowed_domains[0],
             'labels': 'journal'

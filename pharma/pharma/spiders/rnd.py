@@ -7,7 +7,7 @@ from pharma.features import clean_date
 
 class RndSpider(CrawlSpider):
     name = 'rnd'
-    allowed_domains = ['rnd.de']
+    allowed_domains = ['www.rnd.de']
     start_urls = ['https://www.rnd.de/gesundheit']
 
     rules = (

@@ -1,39 +1,51 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+from scrapy_splash import SplashRequest
 
-from pharma.features import clean_date
-
-class PresseportalSpider(CrawlSpider):
+class PresseportalSpider(scrapy.Spider):
     name = 'presseportal'
     allowed_domains = ['www.presseportal.de']
     start_urls = ['https://www.presseportal.de/t/gesundheit-medizin']
 
-    rules = (
-        Rule(LinkExtractor(restrict_xpaths='//article[@class="news"]/h3/a'), callback='parse_item', follow=True),
-        # Rule(LinkExtractor(restrict_xpaths='//li[@class="hcf-paging-forward"][1]/a'), callback='parse_item', follow=True),
-    )
 
     title_xpath = '//h1/text()'
     text_xpath = '//div[@class="card"]/p[child::text()]/descendant::text()'
     author_xpath = '//a[@class="story-customer"]/text()'
     contentdate_xpath = 'substring-before(//p[@class="date"]/text(), "–")'
 
+    script = '''
+    function main(splash, args)
+        splash.private_mode_enabled = false
+        url = args.url
+        assert(splash:go(url))
+        assert(splash:wait(1))
+        splash:set_viewport_full()
+        return splash:html()
+    end
+    '''
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield SplashRequest(url=url, callback=self.parse, endpoint='execute', args={
+                'lua_source': self.script
+            })
+
+    def parse(self, response):
+        links = response.xpath('//h3[@class="news-headline-clamp"]')
+        for link in links:
+            yield response.follow(url=link.xpath('./a/@href').get(), callback=self.parse_item, meta={'date': link.xpath('substring-before(./preceding-sibling::div[@class="news-meta"]/h5[@class="date"]/text(), "–")').get()})
 
     def parse_item(self, response):
         # author_list = response.xpath(self.author_xpath).getall()
         authors = response.xpath(self.author_xpath).get()
         text_list = response.xpath(self.text_xpath).getall()
         text = '\n'.join(text_list)
-        content_date_raw = response.xpath(self.contentdate_xpath).get()
-        content_date_clean = clean_date(content_date_raw)
 
         yield {
             'title': response.xpath(self.title_xpath).get(),
             'author': authors,
             'content_text': text,
-            'content_date': content_date_clean,
+            'content_date': response.meta.get('date'),
             'url': response.url,
             'url_base': self.allowed_domains[0],
             'labels': 'news'

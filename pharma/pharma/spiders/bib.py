@@ -13,7 +13,7 @@ class BibSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//div[@class="teaser type-1 row"]//h2/a'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//a[@class="forward button"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[@class="forward button"]'), follow=True),
     )
 
     title_xpath = '//h1[@class="isFirstInSlot"]/text()'
@@ -23,15 +23,19 @@ class BibSpider(CrawlSpider):
 
 
     def parse_item(self, response):
+        title_list = response.xpath(self.title_xpath).getall()
+        title = ' '.join(title_list)
         author_list = response.xpath(self.author_xpath).getall()
         authors = ' '.join(author_list)
+        if authors is None:
+            authors = 'Bundesinstitut für Bevölkerungsforschung'
         text_list = response.xpath(self.text_xpath).getall()
         text = '\n'.join(text_list)
         content_date_raw = response.xpath(self.contentdate_xpath).get()
         content_date_clean = clean_date(content_date_raw)
 
         yield {
-            'title': response.xpath(self.title_xpath).get(),
+            'title': title,
             'author': authors,
             'content_text': text,
             'content_date': content_date_clean,

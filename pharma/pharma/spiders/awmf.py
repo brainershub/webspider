@@ -37,5 +37,5 @@ class AwmfSpider(CrawlSpider):
             'content_date': content_date_clean,
             'url': response.url,
             'url_base': self.allowed_domains[0],
-            'labels': 'blog'
+            'labels': 'news'
         }

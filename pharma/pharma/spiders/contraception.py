@@ -12,11 +12,11 @@ class ContraceptionSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//a[@data-test="title-link"]'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//a[@rel="next"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[@rel="next"]'), follow=True),
     )
 
     title_xpath = '//h1/text()'
-    text_xpath = '//div[@id="Abs1-content"]/p/descendant::text() | //div[@id="Abs1-content"]/h3/text()'
+    text_xpath = '//div[contains(@id, "Abs") and contains(@class,"content")]/descendant::text() | //div[contains(@id, "Sec") and contains(@class,"content")]/descendant::text()'
     author_xpath = '//a[@data-test="author-name"]/text()'
     contentdate_xpath = '//article//li/a/time/text()'
 

@@ -1,22 +1,34 @@
+import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
 from pharma.features import clean_date
 
-class BioscientificaSpider(CrawlSpider):
+class BioscientificaSpider(scrapy.Spider):
     name = 'bioscientifica'
     allowed_domains = ['rep.bioscientifica.com']
     start_urls = ['https://rep.bioscientifica.com/browse']
 
-    rules = (
-        Rule(LinkExtractor(restrict_xpaths='//div[@title="Open access"]/following-sibling::div//a'), callback='parse_item', follow=True),
-        # Rule(LinkExtractor(restrict_xpaths='//a[@title="Next page"]'), follow=True),
-    )
+    # rules = (
+    #     Rule(LinkExtractor(restrict_xpaths='//div[@title="Free access"]/following-sibling::div//a'), callback='parse_item', follow=True),
+    #     # Rule(LinkExtractor(restrict_xpaths='//a[@title="Next page"]'), follow=True),
+    # )
 
     title_xpath = '//h1/text()'
     text_xpath = '//div[@class="section"]/descendant::text()'
     author_xpath = '//span[text()="Authors:"]/following-sibling::span/a/text()'
     contentdate_xpath = '//dl[@class="onlinepubdate c-List__items"]/dd/text()'
+
+    def start_requests(self):
+        pages = 10
+        for i in range(1,pages):
+            url = 'https://rep.bioscientifica.com/browse?access=all&page=' + str(i)
+            yield scrapy.Request(url=url, callback=self.parse)
+
+    def parse(self, response):
+        links = response.xpath('//div[@title="Free access"]/following-sibling::div//a')
+        for link in links:
+            yield response.follow(url=link, callback=self.parse_item)
 
 
     def parse_item(self, response):

@@ -13,11 +13,11 @@ class JournalonkoSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//a[@title="Zum Beitrag"]'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//a[@rel="next"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[@rel="next"]'), follow=True),
     )
 
     title_xpath = '//h1/text()'
-    text_xpath = '//section[@class="vorspann"]/text() | //div[@class="textBox"]/descendant::text()[parent::div or parent::h2]'
+    text_xpath = '//section[@class="vorspann"]/descendant::text() | //div[@class="textBox"]/descendant::text()[parent::div or parent::h2 or parent::p]'
     # author_xpath = '//span[@class="contributor"]/text()'
     contentdate_xpath = '//span[@class="newsDate "]/text()'
 

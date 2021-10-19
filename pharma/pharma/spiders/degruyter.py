@@ -8,15 +8,15 @@ from pharma.features import clean_date
 class DegruyterSpider(CrawlSpider):
     name = 'degruyter'
     allowed_domains = ['www.degruyter.com']
-    start_urls = ['http://www.degruyter.com/']
+    start_urls = ['https://www.degruyter.com/search?query=*&sortBy=mostrecent&documentTypeFacet=article&publisherFacet=De+Gruyter']
 
     rules = (
-        Rule(LinkExtractor(restrict_xpaths='//div[@id="newOpenAccessContainer"]//a[parent::span]'), callback='parse_item', follow=True),
-        # Rule(LinkExtractor(restrict_xpaths='//a[text()="Next ›"]'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//h2[contains(@class, "title")]/parent::a'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//ul[@class="pagination"]/li[last()]/a'), follow=True),
     )
 
-    title_xpath = '//h1/text()'
-    text_xpath = '//div[@class="article"]//p/descendant::text()'
+    title_xpath = '//h1[not(@class)]/text()'
+    text_xpath = '//div[@class="article"]/descendant::text()'
     author_xpath = '//span[@class="contributor"]/text()'
     contentdate_xpath = '//span[@class="publicationDate"]/text()'
 

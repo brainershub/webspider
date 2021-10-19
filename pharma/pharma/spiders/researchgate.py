@@ -12,14 +12,13 @@ class ResearchgateSpider(CrawlSpider):
 
     rules = (
         Rule(LinkExtractor(restrict_xpaths='//h1/a'), callback='parse_item', follow=True),
-        Rule(LinkExtractor(restrict_xpaths='//li[@class="hcf-paging-forward"][1]/a'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(restrict_xpaths='//a[contains(@class, " navi-next")]'), follow=True),
     )
 
     title_xpath = '//h1[@class="post-title"]/text()'
-    text_xpath = '//div[@class="card"]/p[child::text()]/descendant::text()'
+    text_xpath = '//div[@class="post-body"]/descendant::text()'
     author_xpath = '//div[@class="post-body"]/div/a[1]/text()'
     contentdate_xpath = '//div[@class="post-date"]/text()'
-
 
     def parse_item(self, response):
         # author_list = response.xpath(self.author_xpath).getall()

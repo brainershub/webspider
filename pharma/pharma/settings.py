@@ -62,8 +62,8 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 #    'pharma.middlewares.PharmaDownloaderMiddleware': 543,
 #}
 DOWNLOADER_MIDDLEWARES = {
-    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
-    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+    # 'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    # 'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
@@ -78,7 +78,8 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   'pharma.pipelines.PharmaPipeline': 10,
+#    'pharma.pipelines.PharmaPipeline': 10,
+   'pharma.pipelines.DataBasePipeline': 11
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -103,11 +104,12 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
-# SPLASH_URL = 'http://192.168.59.103:8051'
+# SPLASH_URL = 'http://192.168.59.103:8050'
 
-# SPLASH_URL = 'http://127.0.0.1:8051'
+# SPLASH_URL = 'http://127.0.0.1:8050'
+SPLASH_URL = 'http://localhost:8050'
 
-SPLASH_URL = os.environ["SPLASH_URL"]
+# SPLASH_URL = os.environ["SPLASH_URL"]
 
 DATABASE = {
     "drivername": "postgresql",
@@ -129,6 +131,7 @@ DATABASE = {
 # }
 
 LOG_LEVEL = "INFO"
+# LOG_FILE = "./logs.txt"
 
 ###SETUP PROXY WITH https://github.com/TeamHG-Memex/scrapy-rotating-proxies
-ROTATING_PROXY_LIST_PATH = 'C:/Users/MikhailPetrovBrainer/Git_Repos/scrapy_dev/proxies.txt'
+# ROTATING_PROXY_LIST_PATH = 'C:/Users/MikhailPetrovBrainer/Git_Repos/scrapy_dev/pharma/proxies.txt'

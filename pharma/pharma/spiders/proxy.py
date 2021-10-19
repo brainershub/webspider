@@ -8,8 +8,8 @@ class ProxySpider(scrapy.Spider):
     start_urls = ['https://free-proxy-list.net/']
     
     def parse(self, response):
-        ip_column = response.xpath('//section[@id="list"]//div[@class="table-responsive"]//tbody//tr/td[1]').getall()
-        port_column = response.xpath('//section[@id="list"]//div[@class="table-responsive"]//tbody//tr/td[2]').getall()
+        ip_column = response.xpath('//section[@id="list"]//div[@class="table-responsive"]//tbody//tr/td[1]/text()').getall()
+        port_column = response.xpath('//section[@id="list"]//div[@class="table-responsive"]//tbody//tr/td[2]/text()').getall()
         proxies_list = []
         for i in range(len(ip_column)):
             proxy = ip_column[i]+':'+port_column[i]
@@ -17,5 +17,5 @@ class ProxySpider(scrapy.Spider):
             
         with open("proxies.txt", "w") as file:
             for proxy in proxies_list:
-                file.writelines(proxy)
+                file.write(proxy+"\n")
             
