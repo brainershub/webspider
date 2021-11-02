@@ -1,17 +1,17 @@
 import scrapy
 
-class DeutschlandfunkSpider(scrapy.Spider):
-    name = 'deutschlandfunk'
-    allowed_domains = ['www.deutschlandfunk.de']
-    start_urls = ['https://www.deutschlandfunk.de/die-nachrichten.1441.de.html']
+class WorldscientigicSpider(scrapy.Spider):
+    name = 'worldscientific'
+    allowed_domains = ['www.worldscientific.com']
+    start_urls = ['https://www.worldscientific.com/action/showNews']
 
-    title_xpath = '//h1/text()[last()]'
+    title_xpath = '//h1/text()'
     # author_xpath = '//a[@data-test="author-name"]/text()'
-    contentdate_xpath = '//div[@class="articlehead"]/header/time/text()'
-    text_xpath = '//div[@class="articlemain"]/descendant::text()'
+    contentdate_xpath = '//div[@class="news__date"]/span[last()]/text()'
+    text_xpath = '//div[@class="news__body"]/descendant::text()'
 
     def parse(self, response):
-        links = response.xpath('//h3/a')
+        links = response.xpath('//a[@class="news-list_item_title"]')
         for l in links:
             yield response.follow(url=l, callback=self.parse_page)
         
@@ -27,7 +27,7 @@ class DeutschlandfunkSpider(scrapy.Spider):
         
         yield {
             'title': title,
-            'author': 'Deutschlandfunk',
+            'author': 'Worldsientific',
             'content_text': text,
             'content_date': content_date_raw,
             'url': response.url,

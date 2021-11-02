@@ -21,10 +21,6 @@ class FertstertSpider(CrawlSpider):
 
     def parse_item(self, response):
         author_list = response.xpath(self.author_xpath).getall()
-        # if author_list:
-        #     authors = author_list
-        # else:
-        #     authors = 'None'
         authors = ', '.join(author_list)
         text_list = response.xpath(self.text_xpath).getall()
         text = '\n'.join(text_list)

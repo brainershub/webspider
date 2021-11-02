@@ -15,12 +15,15 @@ class ElsevierSpider(scrapy.Spider):
     def parse(self, response):
         articles = response.xpath('//article')
         for article in articles:
-            url = article.xpath('//a')
-            date = article.xpath('//small[@class="article-date"]').get()
-            yield response.follow(url=url, callback=self.parse_item, meta={'date': date})
+            url = article.xpath('.//a')
+            date = article.xpath('.//small[@class="article-date"]/text()').get()
+            yield response.follow(url=url[0], callback=self.parse_item, meta={'date': date})
         next_page = response.xpath('//ol[@class="pagination"]/li[2]//a')
         if next_page is not None:
-            yield response.follow(url=next_page, callback=self.parse)
+            try:
+                yield response.follow(url=next_page, callback=self.parse)
+            except:
+                yield response.follow(url=next_page[0], callback=self.parse)
 
     def parse_item(self, response):
         # author_list = response.xpath(self.author_xpath).getall()

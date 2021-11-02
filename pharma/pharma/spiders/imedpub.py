@@ -30,6 +30,6 @@ class ImedpubSpider(scrapy.Spider):
             'content_text': text,
             'content_date': response.meta.get('date'),
             'url': response.url,
-            'url_base': self.allowed_domains[0],
+            'url_base': self.start_urls[0],
             'labels': 'journal'
         }

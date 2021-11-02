@@ -3,10 +3,11 @@ import scrapy
 class SciencedirectSpider(scrapy.Spider):
     name = 'sciencedirect'
     allowed_domains = ['www.sciencedirect.com']
-    start_urls = ['https://www.sciencedirect.com/journal/reproduction-and-breeding/issues']
+    start_urls = ['https://www.sciencedirect.com/journal/reproductive-biology/issues',
+        'https://www.sciencedirect.com/journal/reproduction-and-breeding/issues']
 
     title_xpath = '//span[@class="title-text"]/text()'
-    text_xpath = '//*[contains(@id, "sec")]/descendant::text()'
+    text_xpath = '//*[contains(@id, "sec")]/descendant::text() | //div[contains(@id, "abstract")]/descendant::text()'
     author_xpath = '//div[@id="author-group"]/a//text()[not(parent::sup)]'
     contentdate_xpath = '//div[@class="text-xs"]/text()[2]'
 
