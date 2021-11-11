@@ -18,3 +18,13 @@ pharma/pharma/__pycache__/
 pharma/pharma/.idea/
 
 do-connection-details*
+
+*__pycache__*
+
+pharma/build
+pharma/dbs
+pharma/eggs
+pharma/logs
+pharma/project.egg-info
+
+pharma/setup.py
